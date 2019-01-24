@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+        <meta charset="utf-8">
+        <script src="https://unpkg.com/vue@latest"></script>
+    </head>
+    <body>
+        <header>
+            <h1>Chat</h1>
+        </header>
+        <main>
+            <div id="chat">
+                <form @submit.prevent="login" v-show="!isLoggedIn">
+                    <input type="text" v-model="user_name">
+                </form>
+                <form @submit.prevent="send_talk" v-show="isLoggedIn">
+                    {{ this.user_name }}: <input type="text" v-model="body" size=30>
+                </form>
+                <ul v-if="isLoggedIn">
+                    <li v-for="talk in talks" :key="talk.id">
+                        <p><strong>{{ talk.user_name }}</strong>: {{ talk.ts }}</p>
+                        <p>{{ talk.body }}</p>
+                    </li>
+                </ul>
+            </div>
+        </main>
+        <script>
+            const chat_component = new Vue({
+                el: '#chat',
+                data: {
+                    user_name: '',
+                    body: '',
+                    ws: null,
+                    talks: [{
+                        id: '',
+                        user_name: '',
+                        body: '',
+                        ts: ''
+                    }], //test data
+                    isLoggedIn: false
+                },
+                methods: {
+                    async login() {
+                        if (this.user_name === '') {
+                            return
+                        }
+                        const result = await (await fetch('/login', {
+                            method: 'POST',
+                            body: JSON.stringify({ user_name: this.user_name }),
+                            headers: {
+                                'content-type': 'application/json'
+                            }
+                        })).json()
+                        // insert error check
+                        this.talks = result
+
+                        this.ws = new WebSocket("ws://localhost:5555/get_ws")
+                        this.ws.onmessage = (event) => {
+                            this.talks.unshift(JSON.parse(event.data))
+                            this.talks.splice(30);
+                        }
+                        this.isLoggedIn = true
+                    },
+                    async send_talk() {
+                        if (this.body === '') {
+                            return
+                        }
+                        await fetch('/send', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                user_name: this.user_name,
+                                body: this.body
+                            }),
+                            headers: {
+                                'content-type': 'application/json'
+                            }
+                        })
+
+                        this.body = ''
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>

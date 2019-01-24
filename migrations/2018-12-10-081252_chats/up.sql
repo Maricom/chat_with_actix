@@ -1,0 +1,6 @@
+CREATE TABLE chats (
+    id UUID PRIMARY KEY NOT NULL,
+    user_name VARCHAR(10) NOT NULL,
+    body TEXT NOT NULL,
+    ts TIMESTAMP NOT NULL
+)
