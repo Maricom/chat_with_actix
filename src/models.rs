@@ -89,7 +89,6 @@ impl Handler<Chat> for WsSession {
 
 impl StreamHandler<ws::Message, ws::ProtocolError> for WsSession {
     fn handle(&mut self, msg: ws::Message, ctx: &mut Self::Context) {
-        // sprintln!("WEBSOCKET MESSAGE: {:?}", msg);
         match msg {
             ws::Message::Ping(msg) => {
                 self.1 = Instant::now();

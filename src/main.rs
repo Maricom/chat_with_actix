@@ -13,7 +13,7 @@ use dotenv::dotenv;
 use std::env;
 use std::collections::HashMap;
 use crate::models::{DbActor, WsActor};
-use crate::routes::{get_index, get_chats, login, send_chat, get_ws};
+use crate::routes::{get_index, login, send_chat, get_ws};
 
 pub struct AppState {
     pub db: Addr<DbActor>,
@@ -36,7 +36,6 @@ fn main() {
 
     server::new(move || App::with_state(AppState { db: db_address.clone(), ws: ws_address.clone()})
             .resource("/", |r| r.method(Method::GET).f(get_index))
-            .resource("/get_chat", |r| r.method(Method::GET).with(get_chats))
             .resource("/login", |r| r.method(Method::POST).with(login))
             .resource("/get_ws", |r| r.method(Method::GET).f(get_ws))
             .resource("/send", |r| r.method(Method::POST).with(send_chat))
